@@ -18,16 +18,20 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          cmdline-tools-version: '11076708'
       - name: Install Android SDK packages
         run: sdkmanager 'platforms;android-35' 'build-tools;34.0.0' 'build-tools;35.0.0'
       - name: Build APK and run Android Lint
-        run: ./gradlew --no-daemon --console=plain assembleDebug lintDebug
+        run: bash ./gradlew --no-daemon --console=plain assembleDebug lintDebug
       - name: Prepare APK
         run: |
           mkdir -p dist
@@ -35,7 +39,7 @@ jobs:
           cd dist
           sha256sum notification-dumper.apk > SHA256SUMS.txt
       - name: Upload installable APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: notification-dumper-apk
           path: dist/
@@ -43,7 +47,7 @@ jobs:
           retention-days: 30
       - name: Upload lint report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: android-lint
           path: app/build/reports/lint-results-debug.*
